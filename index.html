@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        
+        <div id="ecran-accueil" class="text-center">
+            <h1>Quiz Interactif</h1>
+            <p>Testez vos connaissances avec ce quiz nba</p>
+            <button id="btn-commencer" class="btn btn-primary btn-lg mt-3">Commencer le quiz</button>
+        </div>
+
+        <div id="interface-quiz" class="d-none">
+            <div class="progress mb-4">
+                <div id="barre-progression" class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+            
+            <div id="question-container">
+                <h2 id="question-titre"></h2>
+                <div id="options-container" class="mt-4"></div>
+            </div>
+            
+            <div class="mt-4 d-flex justify-content-between">
+                <button id="btn-precedent" class="btn btn-secondary">Précédent</button>
+                <button id="btn-suivant" class="btn btn-primary">Suivant</button>
+                <button id="btn-valider" class="btn btn-success d-none">Valider le quiz</button>
+            </div>
+        </div>
+        
+        <div id="resultat-final" class="d-none text-center">
+            <h2>Résultats du Quiz</h2>
+            <div class="card mt-4 p-4">
+                <h3>Votre score:</h3>
+                <h1 id="score-final" class="display-1"></h1>
+                <p id="message-resultat"></p>
+            </div>
+            
+            <div id="resume-questions" class="mt-4"></div>
+            
+            <button id="btn-recommencer" class="btn btn-primary btn-lg mt-4">Recommencer le quiz</button>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="quiz.js"></script>
+</body>
+</html>
