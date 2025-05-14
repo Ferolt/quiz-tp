@@ -1,3 +1,4 @@
+
 // Variables globales
 let questionCourante = 0;
 let reponsesUtilisateur = [];
@@ -21,13 +22,7 @@ const messageResultat = document.getElementById("message-resultat");
 const resumeQuestions = document.getElementById("resume-questions");
 const barreProgression = document.getElementById("barre-progression");
 
-// Local Storage Keys
-const LS_QUESTION_COURANTE = "quiz_question_courante";
-const LS_REPONSES = "quiz_reponses";
-const LS_QUIZ_EN_COURS = "quiz_en_cours";
-
 // Événements
-document.addEventListener("DOMContentLoaded", initialiserQuiz);
 btnCommencer.addEventListener("click", commencerQuiz);
 btnSuivant.addEventListener("click", questionSuivante);
 btnPrecedent.addEventListener("click", questionPrecedente);
@@ -35,44 +30,10 @@ btnValider.addEventListener("click", validerQuiz);
 btnRecommencer.addEventListener("click", recommencerQuiz);
 
 // Fonctions
-function initialiserQuiz() {
-    // Vérifier si un quiz est en cours
-    const quizEnCours = localStorage.getItem(LS_QUIZ_EN_COURS);
-    
-    if (quizEnCours === "true") {
-        // Récupérer la question courante
-        const savedQuestion = localStorage.getItem(LS_QUESTION_COURANTE);
-        if (savedQuestion !== null) {
-            questionCourante = parseInt(savedQuestion);
-        }
-        
-        // Récupérer les réponses utilisateur
-        const savedReponses = localStorage.getItem(LS_REPONSES);
-        if (savedReponses !== null) {
-            reponsesUtilisateur = JSON.parse(savedReponses);
-        } else {
-            reponsesUtilisateur = Array(questions.length).fill("");
-        }
-        
-        // Afficher l'interface du quiz
-        ecranAccueil.classList.add("d-none");
-        interfaceQuiz.classList.remove("d-none");
-        afficherQuestion();
-    }
-}
-
-function sauvegarderEtat() {
-    localStorage.setItem(LS_QUESTION_COURANTE, questionCourante);
-    localStorage.setItem(LS_REPONSES, JSON.stringify(reponsesUtilisateur));
-    localStorage.setItem(LS_QUIZ_EN_COURS, "true");
-}
-
 function commencerQuiz() {
     ecranAccueil.classList.add("d-none");
     interfaceQuiz.classList.remove("d-none");
     reponsesUtilisateur = Array(questions.length).fill("");
-    questionCourante = 0;
-    sauvegarderEtat();
     afficherQuestion();
 }
 
@@ -103,7 +64,6 @@ function afficherQuestion() {
         input.value = reponsesUtilisateur[questionCourante];
         input.addEventListener("input", (e) => {
             reponsesUtilisateur[questionCourante] = e.target.value;
-            sauvegarderEtat();
         });
         optionsContainer.appendChild(input);
     }
@@ -123,9 +83,6 @@ function afficherQuestion() {
     const progression = ((questionCourante + 1) / questions.length) * 100;
     barreProgression.style.width = `${progression}%`;
     barreProgression.setAttribute("aria-valuenow", progression);
-    
-    // Sauvegarde de l'état
-    sauvegarderEtat();
 }
 
 function selectionnerOption(option) {
@@ -140,9 +97,6 @@ function selectionnerOption(option) {
             button.classList.remove("option-selected");
         }
     });
-    
-    // Sauvegarde de l'état
-    sauvegarderEtat();
 }
 
 function questionSuivante() {
@@ -161,8 +115,6 @@ function questionPrecedente() {
 
 function validerQuiz() {
     calculerScore();
-    // Effacer les données du quiz en cours
-    effacerDonneesQuiz();
     afficherResultats();
 }
 
@@ -205,65 +157,47 @@ function afficherResultats() {
         messageResultat.textContent = "🥲";
     }
     
-    // Affichage du résumé des questions
-    resumeQuestions.innerHTML = "";
-    questions.forEach((q, index) => {
-        const questionElement = document.createElement("div");
-        questionElement.className = "question-resume";
+// Affichage du résumé des questions
+resumeQuestions.innerHTML = "";
+questions.forEach((q, index) => {
+    const questionElement = document.createElement("div");
+    questionElement.className = "question-resume";
 
-        const reponseUtilisateur = reponsesUtilisateur[index] || "Non répondue";
-        const reponseCorrecte = q.reponseCorrecte;
-        const estCorrecte = 
-            q.type === "texte" 
-                ? reponseUtilisateur.trim().toLowerCase() === reponseCorrecte.toLowerCase()
-                : reponseUtilisateur === reponseCorrecte;
+    const reponseUtilisateur = reponsesUtilisateur[index] || "Non répondue";
+    const reponseCorrecte = q.reponseCorrecte;
+    const estCorrecte = 
+        q.type === "texte" 
+            ? reponseUtilisateur.trim().toLowerCase() === reponseCorrecte.toLowerCase()
+            : reponseUtilisateur === reponseCorrecte;
 
-        questionElement.classList.add(estCorrecte ? "reponse-correcte" : "reponse-incorrecte");
+    questionElement.classList.add(estCorrecte ? "reponse-correcte" : "reponse-incorrecte");
 
-        let message;
-        if (reponseUtilisateur === "Non répondue") {
-            message = "❗ Vous n'avez pas répondu à cette question.";
-        } else if (estCorrecte) {
-            message = "✅ Yes sir";
-        } else {
-            message = "❌";
-        }
-
-        questionElement.innerHTML = `
-            <h5>Question ${index + 1}: ${q.question}</h5>
-            <p><strong>Votre réponse:</strong> ${reponseUtilisateur}</p>
-            <p><strong>Réponse correcte:</strong> ${reponseCorrecte}</p>
-            <p>${message}</p>
-        `;
-
-        resumeQuestions.appendChild(questionElement);
-    });
-    
-    // Sauvegarde du meilleur score dans le localStorage
-    sauvegarderMeilleurScore(scorePercentage);
-}
-
-function sauvegarderMeilleurScore(scorePercentage) {
-    const meilleurScore = localStorage.getItem("quiz_meilleur_score") || 0;
-    if (scorePercentage > meilleurScore) {
-        localStorage.setItem("quiz_meilleur_score", scorePercentage);
+    let message;
+    if (reponseUtilisateur === "Non répondue") {
+        message = "❗ Vous n'avez pas répondu à cette question.";
+    } else if (estCorrecte) {
+        message = "✅ Yes sir";
+    } else {
+        message = "❌";
     }
+
+    questionElement.innerHTML = `
+        <h5>Question ${index + 1}: ${q.question}</h5>
+        <p><strong>Votre réponse:</strong> ${reponseUtilisateur}</p>
+        <p><strong>Réponse correcte:</strong> ${reponseCorrecte}</p>
+        <p>${message}</p>
+    `;
+
+    resumeQuestions.appendChild(questionElement);
+});
+
 }
 
 function recommencerQuiz() {
-    effacerDonneesQuiz();
-    resultatFinal.classList.add("d-none");
-    ecranAccueil.classList.remove("d-none");
-}
-
-function effacerDonneesQuiz() {
-    // Réinitialiser les variables
     questionCourante = 0;
     reponsesUtilisateur = Array(questions.length).fill("");
     score = 0;
     
-    // Supprimer les données du localStorage (sauf le meilleur score)
-    localStorage.removeItem(LS_QUESTION_COURANTE);
-    localStorage.removeItem(LS_REPONSES);
-    localStorage.removeItem(LS_QUIZ_EN_COURS);
+    resultatFinal.classList.add("d-none");
+    ecranAccueil.classList.remove("d-none");
 }
